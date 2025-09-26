@@ -9,7 +9,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const dataFile = path.join(__dirname, 'assets.json');
+const dataFile = path.join(process.env.RENDER_DISK_MOUNT || __dirname, 'assets.json'); // Use /data if set in env for Render disk
 
 // Admin credentials from environment variables
 const ADMIN_ID = process.env.ADMIN_ID || 'admin';
@@ -68,15 +68,6 @@ function generateSessionId() {
 function getNetworkIP() {
   if (process.env.BASE_URL) {
     return process.env.BASE_URL;
-  }
-
-  const interfaces = os.networkInterfaces();
-  for (const iface of Object.values(interfaces)) {
-    for (const alias of iface) {
-      if (alias.family === 'IPv4' && !alias.internal) {
-        return `http://${alias.address}:${port}`;
-      }
-    }
   }
   return `http://localhost:${port}`; // Fallback if no external IP is found
 }
@@ -228,7 +219,7 @@ app.post('/login', (req, res) => {
   if (id === ADMIN_ID && password === ADMIN_PASSWORD) {
     const sessionId = generateSessionId();
     sessions.set(sessionId, { authenticated: true });
-    res.setHeader('Set-Cookie', `sessionId=${sessionId}; HttpOnly; Path=/`);
+    res.setHeader('Set-Cookie', `sessionId=${sessionId}; HttpOnly; Path=/; Secure; SameSite=Strict`);
     res.redirect('/');
   } else {
     res.status(401).send(`
@@ -258,7 +249,7 @@ app.get('/logout', (req, res) => {
   if (sessionId) {
     sessions.delete(sessionId);
   }
-  res.setHeader('Set-Cookie', 'sessionId=; Max-Age=0; HttpOnly; Path=/');
+  res.setHeader('Set-Cookie', 'sessionId=; Max-Age=0; HttpOnly; Path=/; Secure; SameSite=Strict');
   res.redirect('/');
 });
 
@@ -985,7 +976,7 @@ app.post('/asset/verify/:id', async (req, res) => {
   if (await bcrypt.compare(password, asset.assetPassword)) {
     const sessionId = generateSessionId();
     sessions.set(sessionId, { assetId: req.params.id, verified: true });
-    res.setHeader('Set-Cookie', `assetSessionId=${sessionId}; HttpOnly; Path=/asset/${req.params.id}`);
+    res.setHeader('Set-Cookie', `assetSessionId=${sessionId}; HttpOnly; Path=/asset/${req.params.id}; Secure; SameSite=Strict`);
     res.redirect(`/asset/${req.params.id}?scan=true`);
   } else {
     res.status(401).send(`
