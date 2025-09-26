@@ -1,0 +1,14 @@
+[
+  [
+    "AMI-IT-Desktop-0001",
+    {
+      "id": "SRINIVASULU",
+      "name": "AMI-IT-Desktop-0001",
+      "location": "WORKSTATION",
+      "department": "IT-ENGINEER",
+      "desktopSetupDate": "",
+      "assetPassword": "$2b$10$2J.TUIooPpALlLfnxmwQhe4iNvN2glyqhkZC8UN2/ER4zKeyMLZXa",
+      "scanHistory": []
+    }
+  ]
+]
